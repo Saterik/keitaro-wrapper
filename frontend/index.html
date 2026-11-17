@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Keitaro Campaign Manager — управление кампаниями с geo-based потоками">
+    <title>Keitaro Campaign Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container header-inner">
+            <div class="brand">
+                <svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="currentColor"/>
+                    <path d="M8 12h16M8 16h12M8 20h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <div class="brand-text">
+                    <h1 class="brand-name">Keitaro Campaign Manager</h1>
+                    <span class="brand-tagline">Geo-based потоки</span>
+                </div>
+            </div>
+            <div class="header-status" id="headerStatus" role="status" aria-live="polite">
+                <span class="status-indicator" id="statusIndicator" aria-hidden="true"></span>
+                <span id="statusText">Подключение…</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main" role="main">
+        <div class="container">
+            <!-- Alert banner -->
+            <div class="alert-banner" id="alertBanner" hidden role="alert"></div>
+
+            <!-- Create Campaign Section -->
+            <section class="card card--primary" id="createSection" aria-labelledby="createTitle">
+                <header class="card-header">
+                    <h2 id="createTitle" class="card-title">
+                        <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        Создать кампанию
+                    </h2>
+                    <p class="card-subtitle">Два потока: гео-фильтр → Google, остальное → оффер</p>
+                </header>
+                <form id="createForm" class="form" novalidate>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="campaignName" class="field-label">Название кампании <span class="required" aria-hidden="true">*</span></label>
+                            <input type="text" id="campaignName" name="name" class="field-input" placeholder="test_ivanov_summer_sale_2024" required autocomplete="off" aria-describedby="nameHint">
+                            <span id="nameHint" class="field-hint">Префикс test_ivanov_ добавится автоматически</span>
+                        </div>
+
+                        <div class="field">
+                            <label for="geoCode" class="field-label">Гео (ISO код) <span class="required" aria-hidden="true">*</span></label>
+                            <input type="text" id="geoCode" name="geo_code" class="field-input" placeholder="RU, US, DE, ES" maxlength="10" required autocomplete="off" aria-describedby="geoHint" style="text-transform: uppercase;">
+                            <span id="geoHint" class="field-hint">Например: RU, US, DE, ES, BR</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="offerSelect" class="field-label">Оффер <span class="required" aria-hidden="true">*</span></label>
+                            <select id="offerSelect" name="offer_id" class="field-select" required aria-describedby="offerHint">
+                                <option value="">Загрузка офферов…</option>
+                            </select>
+                            <span id="offerHint" class="field-hint">Выберите оффер из Keitaro</span>
+                        </div>
+
+                        <div class="field">
+                            <label for="domainSelect" class="field-label">Домен</label>
+                            <select id="domainSelect" name="domain_id" class="field-select" aria-describedby="domainHint">
+                                <option value="">Авто (первый доступный)</option>
+                            </select>
+                            <span id="domainHint" class="field-hint">Опционально</span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="groupSelect" class="field-label">Группа</label>
+                            <select id="groupSelect" name="group_id" class="field-select" aria-describedby="groupHint">
+                                <option value="">Авто (первая доступная)</option>
+                            </select>
+                            <span id="groupHint" class="field-hint">Опционально</span>
+                        </div>
+
+                        <div class="field">
+                            <label for="sourceSelect" class="field-label">Источник трафика</label>
+                            <select id="sourceSelect" name="traffic_source_id" class="field-select" aria-describedby="sourceHint">
+                                <option value="">Авто (первый доступный)</option>
+                            </select>
+                            <span id="sourceHint" class="field-hint">Опционально</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary btn--lg" id="createBtn">
+                            <span class="btn-content">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                                <span class="btn-text">Создать кампанию</span>
+                            </span>
+                            <span class="btn-loader" aria-hidden="true">
+                                <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Campaigns List Section -->
+            <section class="card" id="listSection" aria-labelledby="listTitle">
+                <header class="card-header card-header--with-action">
+                    <div>
+                        <h2 id="listTitle" class="card-title">
+                            <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6"/></svg>
+                            Кампании
+                        </h2>
+                        <p class="card-subtitle" id="campaignsCount">Загрузка…</p>
+                    </div>
+                    <button type="button" class="btn btn--ghost" id="refreshBtn" aria-label="Обновить список">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                    </button>
+                </header>
+
+                <div class="table-wrapper" role="region" aria-label="Список кампаний" tabindex="0">
+                    <table class="table" id="campaignsTable">
+                        <thead>
+                            <tr>
+                                <th scope="col">Название</th>
+                                <th scope="col">Гео</th>
+                                <th scope="col">Оффер</th>
+                                <th scope="col">Домен</th>
+                                <th scope="col">Группа</th>
+                                <th scope="col">Источник</th>
+                                <th scope="col">Стримы</th>
+                                <th scope="col">Создана</th>
+                                <th scope="col"><span class="visually-hidden">Действия</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignsBody">
+                            <tr class="table-loading">
+                                <td colspan="9">
+                                    <div class="loading-state">
+                                        <svg class="loading-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                                        <span>Загрузка кампаний…</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-state" id="emptyState" hidden>
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+                    <h3>Кампаний пока нет</h3>
+                    <p>Создайте первую кампанию в форме выше — она автоматически настроит два потока</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Campaign Detail Modal -->
+    <dialog class="modal" id="detailModal" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-backdrop" tabindex="-1"></div>
+        <div class="modal-container">
+            <header class="modal-header">
+                <div>
+                    <h3 id="modalTitle" class="modal-title">Детали кампании</h3>
+                    <p class="modal-subtitle" id="modalSubtitle">Информация о потоках и офферах</p>
+                </div>
+                <button type="button" class="modal-close" id="closeModal" aria-label="Закрыть">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+            <div class="modal-body" id="modalBody">
+                <div class="loading-state loading-state--inline">
+                    <svg class="loading-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                    <span>Загрузка деталей…</span>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Add Offer Modal -->
+    <dialog class="modal" id="addOfferModal" aria-labelledby="addOfferTitle" aria-modal="true">
+        <div class="modal-backdrop" tabindex="-1"></div>
+        <div class="modal-container modal-container--sm">
+            <header class="modal-header">
+                <div>
+                    <h3 id="addOfferTitle" class="modal-title">Добавить оффер в кампанию</h3>
+                    <p class="modal-subtitle">Оффер добавится во второй поток (позиция 2)</p>
+                </div>
+                <button type="button" class="modal-close" id="closeAddOfferModal" aria-label="Закрыть">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+            <form id="addOfferForm" class="modal-body">
+                <div class="field">
+                    <label for="addOfferSelect" class="field-label">Оффер <span class="required" aria-hidden="true">*</span></label>
+                    <select id="addOfferSelect" name="offer_id" class="field-select" required>
+                        <option value="">Выберите оффер</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--ghost" id="cancelAddOffer">Отмена</button>
+                    <button type="submit" class="btn btn--primary">
+                        <span class="btn-content">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                            <span class="btn-text">Добавить оффер</span>
+                        </span>
+                        <span class="btn-loader" aria-hidden="true">
+                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- Confirm Delete Modal -->
+    <dialog class="modal" id="confirmModal" aria-labelledby="confirmTitle" aria-modal="true" aria-describedby="confirmText">
+        <div class="modal-backdrop" tabindex="-1"></div>
+        <div class="modal-container modal-container--sm">
+            <header class="modal-header">
+                <h3 id="confirmTitle" class="modal-title">Подтверждение удаления</h3>
+                <button type="button" class="modal-close" id="closeConfirmModal" aria-label="Закрыть">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+            <div class="modal-body">
+                <p id="confirmText" class="confirm-text"></p>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn btn--ghost" id="cancelConfirm">Отмена</button>
+                <button type="button" class="btn btn--danger" id="confirmDelete">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    Удалить
+                </button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="region" aria-live="polite" aria-label="Уведомления"></div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container footer-inner">
+            <p>Keitaro Campaign Manager &copy; 2024</p>
+            <div class="footer-links">
+                <a href="/docs" target="_blank" rel="noopener">API Docs</a>
+                <span class="footer-divider" aria-hidden="true">·</span>
+                <a href="/health" target="_blank" rel="noopener">Health</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
